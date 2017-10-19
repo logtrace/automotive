@@ -1,35 +1,43 @@
 import React from 'react'
-// Devtools
-import {composeWithDevTools} from 'redux-devtools-extension'
 // Redux stuff
 import thunk from 'redux-thunk'
 import {createStore, applyMiddleware, compose} from 'redux'
 import {routerMiddleware} from 'react-router-redux'
 // Application
-import {rootReducer} from 'reducers'
+import rootReducer from 'reducers'
 import {Root} from 'components'
-import {Routing, history} from 'routing'
+import {routes, history} from 'routing'
 
+/**
+ * Configure application store with middlewares.
+ * @param  {Object} initialState - preloadedState
+ * @return {Object} - configured store
+ */
 export const configureStore = initialState => {
-  const routerMiddlewareApplied = applyMiddleware(routerMiddleware(history))
-  const thunkApplied = applyMiddleware(thunk)
-  let middlewares = null
+	const thunkApplied = applyMiddleware(thunk)
+	const routerMiddlewareApplied = applyMiddleware(routerMiddleware(history))
+	let enhancers
 
-  if (process.env.NODE_ENV === 'development') {
-    middlewares = composeWithDevTools(routerMiddlewareApplied, thunkApplied)
-  } else {
-    middlewares = compose(routerMiddlewareApplied, thunkApplied)
-  }
+	if (process.env.NODE_ENV === 'development') {
+		const {composeWithDevTools} = require('redux-devtools-extension')
+		enhancers = composeWithDevTools(thunkApplied, routerMiddlewareApplied)
+	} else {
+		enhancers = compose(thunkApplied, routerMiddlewareApplied)
+	}
 
-  return createStore(rootReducer, initialState, middlewares)
+	return createStore(rootReducer, initialState, enhancers)
 }
-
-export const configureRootComponent = store => {
+/* eslint-disable */
+export const configureRootComponent = ({store, SSR}) => {
+  // stupid eslint thinks that if function returns JSX, than it's a component
+  // "Eslint, I don't want a component, I want a function!"
   const propsRoot = {
-    routes: Routing,
+    routes,
     history,
-    store
+    store,
+    SSR
   }
 
   return <Root {...propsRoot} />
 }
+/* eslint-enable */

@@ -1,7 +1,5 @@
-require('babel-core/register')
-// require.extensions['.scss'] = () => {}
-// require.extensions['.css'] = () => {}
-global.window = {}
-console.log('It\'s still under development. Do not try to use!')
+global.i18n = str => str
+global.fetch = require('node-fetch')
+
+// Import app
 require('./server')
-// SSR is under development, be patient :)
